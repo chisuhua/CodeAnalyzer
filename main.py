@@ -93,7 +93,7 @@ def generate_png_from_dot(dot_content):
         if png_path and os.path.exists(png_path):
             try:
                 os.unlink(png_path)
-            except:
+            except OSError:
                 pass
         return None
     finally:
@@ -101,7 +101,7 @@ def generate_png_from_dot(dot_content):
         if dot_path and os.path.exists(dot_path):
             try:
                 os.unlink(dot_path)
-            except:
+            except OSError:
                 pass
 
 def main():
