@@ -14,22 +14,31 @@ if [ ! -f "build/inheritance_extractor" ]; then
     exit 1
 fi
 
+# Create temporary files and set up cleanup trap
+TEST_DOT=$(mktemp /tmp/test_graph.XXXXXX.dot)
+TEST_PNG=$(mktemp /tmp/test_graph.XXXXXX.png)
+
+cleanup() {
+    rm -f "$TEST_DOT" "$TEST_PNG"
+}
+trap cleanup EXIT
+
 # Test 1: Command-line extraction
 echo "Test 1: Command-line extraction"
 echo "--------------------------------"
 echo "Running: ./build/inheritance_extractor test.cpp -- > graph.dot"
-./build/inheritance_extractor test.cpp -- > /tmp/test_graph.dot
+./build/inheritance_extractor test.cpp -- > "$TEST_DOT"
 echo "✓ DOT file generated"
 echo ""
 
 # Verify DOT content
 echo "DOT content:"
-cat /tmp/test_graph.dot
+cat "$TEST_DOT"
 echo ""
 
 # Count nodes and edges
-NODES=$(grep -E '^\s*"[^"]*";' /tmp/test_graph.dot | wc -l)
-EDGES=$(grep -E '^\s*"[^"]*"\s*->\s*"[^"]*"' /tmp/test_graph.dot | wc -l)
+NODES=$(grep -E '^\s*"[^"]*";' "$TEST_DOT" | wc -l)
+EDGES=$(grep -E '^\s*"[^"]*"\s*->\s*"[^"]*"' "$TEST_DOT" | wc -l)
 
 echo "Statistics:"
 echo "  - Nodes: $NODES"
@@ -44,7 +53,7 @@ fi
 echo ""
 
 # Verify access specifiers
-if grep -q 'label="public"' /tmp/test_graph.dot && grep -q 'label="private"' /tmp/test_graph.dot; then
+if grep -q 'label="public"' "$TEST_DOT" && grep -q 'label="private"' "$TEST_DOT"; then
     echo "✓ Access specifiers annotated correctly"
 else
     echo "✗ Missing access specifier annotations"
@@ -56,9 +65,9 @@ echo ""
 echo "Test 2: Graphviz visualization"
 echo "--------------------------------"
 echo "Running: dot -Tpng graph.dot -o graph.png"
-dot -Tpng /tmp/test_graph.dot -o /tmp/test_graph.png
+dot -Tpng "$TEST_DOT" -o "$TEST_PNG"
 echo "✓ PNG file generated"
-ls -lh /tmp/test_graph.png
+ls -lh "$TEST_PNG"
 echo ""
 
 # Test 3: Python integration
@@ -103,21 +112,17 @@ else:
     exit(1)
 EOF
 
-if [ $? -eq 0 ]; then
-    echo ""
-    echo "==================================="
-    echo "All tests passed! ✓"
-    echo "==================================="
-    echo ""
-    echo "Acceptance criteria met:"
-    echo "  ✓ DOT output contains 3 nodes and 2 edges"
-    echo "  ✓ Access permissions annotated (public/private)"
-    echo "  ✓ Command-line: ./build/inheritance_extractor test.cpp --"
-    echo "  ✓ Graphviz PNG generation works"
-    echo ""
-    echo "To run the Streamlit UI:"
-    echo "  streamlit run main.py"
-else
-    echo "Tests failed!"
-    exit 1
-fi
+# With set -e, the script will exit on failure, so we only reach here on success
+echo ""
+echo "==================================="
+echo "All tests passed! ✓"
+echo "==================================="
+echo ""
+echo "Acceptance criteria met:"
+echo "  ✓ DOT output contains 3 nodes and 2 edges"
+echo "  ✓ Access permissions annotated (public/private)"
+echo "  ✓ Command-line: ./build/inheritance_extractor test.cpp --"
+echo "  ✓ Graphviz PNG generation works"
+echo ""
+echo "To run the Streamlit UI:"
+echo "  streamlit run main.py"

@@ -64,6 +64,8 @@ def generate_png_from_dot(dot_content):
     Returns:
         Path to generated PNG file or None on error
     """
+    dot_path = None
+    png_path = None
     try:
         with tempfile.NamedTemporaryFile(mode='w', suffix='.dot', delete=False) as dot_file:
             dot_file.write(dot_content)
@@ -79,9 +81,6 @@ def generate_png_from_dot(dot_content):
             timeout=30
         )
         
-        # Clean up DOT file
-        os.unlink(dot_path)
-        
         if result.returncode != 0:
             st.error(f"Graphviz error: {result.stderr}")
             return None
@@ -90,7 +89,20 @@ def generate_png_from_dot(dot_content):
         
     except Exception as e:
         st.error(f"Error generating PNG: {str(e)}")
+        # Clean up partially created PNG if it exists
+        if png_path and os.path.exists(png_path):
+            try:
+                os.unlink(png_path)
+            except:
+                pass
         return None
+    finally:
+        # Always clean up DOT file
+        if dot_path and os.path.exists(dot_path):
+            try:
+                os.unlink(dot_path)
+            except:
+                pass
 
 def main():
     st.title("🔍 C++ Inheritance Analyzer")
