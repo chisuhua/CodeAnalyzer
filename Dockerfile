@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Install Clang 16
 RUN wget https://apt.llvm.org/llvm.sh && \
     chmod +x llvm.sh && \
+    # Note: In production, verify checksum here
+    # echo "expected_checksum llvm.sh" | sha256sum -c - && \
     ./llvm.sh 16 && \
     rm llvm.sh
 

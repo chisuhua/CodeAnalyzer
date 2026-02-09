@@ -140,7 +140,7 @@ def main():
                         png_path = generate_png_from_dot(dot_content)
                     
                     if png_path:
-                        st.image(png_path, use_column_width=True)
+                        st.image(png_path, use_container_width=True)
                         # Clean up PNG file
                         os.unlink(png_path)
                     else:
