@@ -15,8 +15,8 @@ if [ ! -f "build/inheritance_extractor" ]; then
 fi
 
 # Create temporary files and set up cleanup trap
-TEST_DOT=$(mktemp /tmp/test_graph.XXXXXX.dot)
-TEST_PNG=$(mktemp /tmp/test_graph.XXXXXX.png)
+TEST_DOT=$(mktemp --suffix=.dot /tmp/test_graph.XXXXXX)
+TEST_PNG=$(mktemp --suffix=.png /tmp/test_graph.XXXXXX)
 
 cleanup() {
     rm -f "$TEST_DOT" "$TEST_PNG"

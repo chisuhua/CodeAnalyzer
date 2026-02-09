@@ -64,6 +64,7 @@ def generate_png_from_dot(dot_content):
     Returns:
         Path to generated PNG file or None on error
     """
+    # Initialize paths to None so finally block can safely check them
     dot_path = None
     png_path = None
     try:
